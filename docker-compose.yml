@@ -1,0 +1,26 @@
+version: "2.1"
+
+services:
+    nginx_proxy:
+        image: jwilder/nginx-proxy
+        ports:
+            - "80:80"
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    engine:
+        build: ./docker/php
+        volumes:
+            - ".:/usr/share/nginx:rw,delegated"
+        working_dir: "/usr/share/nginx"
+
+    server:
+        build: ./docker/nginx
+        links:
+            - "engine:engine"
+        volumes_from:
+            - "engine"
+        working_dir: "/usr/share/nginx"
+        environment:
+            - "VIRTUAL_HOST=wunderlist.api"
+
